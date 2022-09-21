@@ -31,6 +31,19 @@ endif (WIN32)
 
 # then Compiler/IDE differences:
 if (MSVC)
+    if (NOT DEFINED CMAKE_MSVC_RUNTIME_LIBRARY)
+    set(CMAKE_MSVC_RUNTIME_LIBRARY
+        MultiThreaded$<$<CONFIG:Debug>:Debug>$<${msvc-shared_rt}:DLL>)
+    endif()
+
+    set(msvc-rt $<TARGET_PROPERTY:MSVC_RUNTIME_LIBRARY>)
+
+    set(msvc-rt-mtd-static $<STREQUAL:${msvc-rt},MultiThreadedDebug>)
+    set(msvc-rt-mt-static $<STREQUAL:${msvc-rt},MultiThreaded>)
+
+    set(msvc-rt-mtd-dll $<STREQUAL:${msvc-rt},MultiThreadedDebugDLL>)
+    set(msvc-rt-mt-dll $<STREQUAL:${msvc-rt},MultiThreadedDLL>)
+
     set(CPPLINT_ARG_OUTPUT      "--output=vs7")
     set(CPPCHECK_ARG_TEMPLATE   "--template=vs")
     # disable Visual Studio warnings for fopen() used in the example
@@ -38,10 +51,12 @@ if (MSVC)
     # Flags for linking with multithread static C++ runtime, required by internal googletest
     if (SQLITECPP_USE_STATIC_RUNTIME)
         message(STATUS "Linking against multithread static C++ runtime")
-        set(CMAKE_C_FLAGS_RELEASE   "${CMAKE_C_FLAGS_RELEASE} /MT")
-        set(CMAKE_C_FLAGS_DEBUG     "${CMAKE_C_FLAGS_DEBUG} /MTd")
-        set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /MT")
-        set(CMAKE_CXX_FLAGS_DEBUG   "${CMAKE_CXX_FLAGS_DEBUG} /MTd")
+        set(CMAKE_C_FLAGS_RELEASE   "${CMAKE_C_FLAGS_RELEASE} /MD")
+        set(CMAKE_C_FLAGS_DEBUG     "${CMAKE_C_FLAGS_DEBUG} /MD")
+        set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /MD")
+        set(CMAKE_CXX_FLAGS_DEBUG   "${CMAKE_CXX_FLAGS_DEBUG} /MD")
+    	
+	# This logic needs to be considered before project()
     endif (SQLITECPP_USE_STATIC_RUNTIME)
     # MSVC versions prior to 2015 are not supported anymore by SQLiteC++ 3.x
     if (MSVC_VERSION LESS 1900) # OR MSVC_TOOLSET_VERSION LESS 140)
