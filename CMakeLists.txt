@@ -22,6 +22,29 @@ message (STATUS "Project version: ${PROJECT_VERSION}")
 
 option(SQLITECPP_USE_STATIC_RUNTIME "Use MSVC static runtime (default for internal googletest)." ON)
 
+# android 
+if (ANDROID)
+    message("Using Andoird build!")
+
+    # Search packages for host system instead of packages for target system
+    # in case of cross compilation these macro should be defined by toolchain file
+    if(NOT COMMAND find_host_package)
+    macro(find_host_package)
+        find_package(${ARGN})
+    endmacro()
+    endif()
+    if(NOT COMMAND find_host_program)
+    macro(find_host_program)
+        find_program(${ARGN})
+    endmacro()
+    endif()
+
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=gnu++11")
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -D__ANDROID__ -DANDROID -DCUSTOM_FLAG")
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DGL_GLEXT_PROTOTYPES=1 -DIOAPI_NO_64 -DUSE_FILE32API ")
+
+endif()
+
 # Define useful variables to handle OS differences:
 if (WIN32)
     set(DEV_NULL                "NUL")
